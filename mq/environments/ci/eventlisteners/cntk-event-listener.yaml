@@ -1,0 +1,31 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  labels:
+    app: cnkt-event-listener
+  name: cnkt-event-listener
+spec:
+  serviceAccountName: pipeline
+  triggers:
+  - name: mq-qm01-dev
+    interceptors:
+      - ref:
+          name: "cel"
+        params:
+        - name: "filter"
+          value: "header.match('X-GitHub-Event', 'push') && body.ref == 'refs/heads/qm1-at-gitops-demo' && body.repository.full_name == 'at-gitops-demo/mq-qm01'"
+    bindings:
+      - ref: cnkt-trigger-binding
+    template:
+      ref: mq-qm-dev
+  # - name: mq-spring-app-dev
+  #   interceptors:
+  #     - ref:
+  #         name: "cel"
+  #       params:
+  #       - name: "filter"
+  #         value: "header.match('X-GitHub-Event', 'push') && body.ref == 'refs/heads/master' && body.repository.full_name == 'at-gitops-demo/mq-spring-app'"
+  #   bindings:
+  #     - ref: cnkt-trigger-binding
+  #   template:
+  #     ref: mq-spring-app-dev
